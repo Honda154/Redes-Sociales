@@ -1,0 +1,134 @@
+---
+title: "Análisis de Usuarios de Redes Sociales"
+author: "Daniel Amador Alvarado C30441"
+lang: es
+format: html
+toc: TRUE
+page-layout: full
+theme: lux
+---
+
+# carga de biblioteca
+
+```{r}
+#| label: carga-biblioteca
+#| warning: false
+#| message: false
+#| code-fold: true
+library(plotly)
+library(readr)
+library(tidyverse)
+library(scales)
+library(ggplot2)
+```
+
+# Introducción
+
+![paginas web](https://upload.wikimedia.org/wikipedia/commons/7/74/Social_media_collection_2020s.png)(https://es.wikipedia.org/wiki/Servicio_de_red_social)
+
+Este sitio presenta un análisis descriptivo e interactivo sobre el uso de redes sociales, utilizando un conjunto de datos llamado **Social Media Users**. El objetivo es comprender mejor los patrones de uso, diferencias por país, la red social, el tiempo de uso de la red.
+
+## Acerca del conjunto de datos
+
+El conjunto de datos contiene información sobre usuarios de diferentes plataformas de redes sociales, segmentada por variables el nombre de la red social, empresa dueña de la red, tiempo de uso por país, etc. Está estructurado en formato CSV y cada fila representa una observación agrupada por categoría. Para saber más de la base de datos puedes visitar [Kaggle](https://www.kaggle.com/datasets/umeradnaan/daily-social-media-active-users).
+
+Las principales variables incluyen:
+
+-   `Platform`: nombre de la red social.
+-   `owner`: empresa dueña de la red.
+-   `primary usage`: uso principal.
+-   `Daily Time Spent (min)`: minutos diarios en promedio que se usan esas plataformas.
+-   `Verified Account`: si la cuenta está verificada (si/no).
+-   `Date Joined`: fecha en la se unió el usuario.
+
+# Carga de Datos
+
+```{r}
+#| label: carga-datos
+#| warning: false
+#| message: false
+#| code-fold: true
+# Carga de los datos de redes sociales
+datos <- read_csv("Social Media Users.csv")
+
+```
+
+# Problematica
+
+¿Cómo varía el tiempo promedio que las personas dedican diariamente a las redes sociales según la plataforma y el país?
+
+```{r}
+#| label: uso-plataformas-edad
+#| warning: false
+#| message: false
+#| code-fold: true
+# Grafico uso de plataformas por rango de edad
+
+library(dplyr)
+library(ggplot2)
+library(plotly)
+
+datos <- read.csv("Social Media Users.csv")
+
+grafico1 <- datos %>%
+  group_by(Country) %>%
+  summarise(Promedio_Tiempo = mean(`Daily.Time.Spent..min.`, na.rm = TRUE)) %>%
+  arrange(desc(Promedio_Tiempo)) %>%
+  slice_head(n = 10) %>%
+  ggplot(aes(x = reorder(Country, Promedio_Tiempo), y = Promedio_Tiempo)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 10 países según tiempo diario en redes sociales",
+    x = "País",
+    y = "Tiempo diario (min)"
+  ) +
+  theme_minimal()
+
+ggplotly(grafico1, tooltip = "text") |>
+  config(locale = "es")
+
+
+```
+
+Este gráfico muestra los 10 países donde las personas pasan más tiempo al día en redes sociales. Como se puede observar, hay diferencias importantes entre países. En algunos casos, el tiempo supera los 180 minutos diarios, lo cual refleja un uso muy alto de estas plataformas. Esto puede deberse a factores como el tipo de redes sociales más usadas en el país, la edad promedio de los usuarios o las costumbres digitales de cada lugar.
+
+```{r}
+#| label: promedio-tiempo
+#| warning: false
+#| message: false
+#| code-fold: true
+# Grafico de promedio de tiempo de uso
+
+grafico2 <- datos %>%
+  group_by(Platform) %>%
+  summarise(Promedio_Tiempo = mean(`Daily.Time.Spent..min.`, na.rm = TRUE)) %>%
+  arrange(desc(Promedio_Tiempo)) %>%
+  ggplot(aes(x = reorder(Platform, Promedio_Tiempo), y = Promedio_Tiempo)) +
+  geom_col(fill = "darkgreen") +
+  coord_flip() +
+  labs(
+    title = "Tiempo promedio diario por plataforma",
+    x = "Plataforma",
+    y = "Tiempo diario (min)"
+  ) +
+  theme_minimal()
+
+ggplotly(grafico2, tooltip = "text") |>
+  config(locale = "es")
+
+```
+
+En este gráfico se compara el tiempo promedio que las personas dedican a diferentes plataformas como WhatsApp, Instagram, WeChat, entre otras. Algunas plataformas muestran un tiempo de uso más elevado, lo que indica que son más atractivas o demandan más atención del usuario. Esto puede estar relacionado con su función principal (como mensajería instantánea o entretenimiento) o con su popularidad en ciertas regiones del mundo.
+
+![redes](https://img.freepik.com/foto-gratis/concepto-marketing-redes-sociales-marketing-aplicaciones_23-2150063163.jpg)
+
+
+## Conclusión
+
+El análisis realizado a partir del conjunto de datos sobre uso de redes sociales nos permite comprender cómo varía el tiempo dedicado a estas plataformas según el país y la aplicación específica. Al observar los promedios diarios de uso por país, se evidencia que en ciertas regiones del mundo las redes sociales tienen una presencia mucho más intensa en la vida cotidiana de las personas. Estos altos niveles de uso podrían estar relacionados con factores culturales, económicos o tecnológicos.
+
+Por otro lado, al comparar las diferentes plataformas, se puede notar que algunas como WhatsApp, Facebook o Instagram tienen un uso promedio mucho mayor que otras. Esto puede reflejar la funcionalidad de cada red social, su nivel de accesibilidad, o incluso las preferencias de cada grupo etario o región.
+
+En conjunto, este trabajo permite responder la pregunta principal: **¿cómo se distribuye y varía el uso diario de redes sociales entre países y plataformas?**. Gracias a los gráficos, las descripciones de las variables y el análisis realizado, se obtuvo una visión más clara sobre el impacto que tienen las redes sociales a nivel global. Estos datos pueden ser útiles para investigaciones futuras relacionadas con el comportamiento digital, el marketing o incluso la salud mental y el bienestar.
+
